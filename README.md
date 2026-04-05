@@ -1,30 +1,39 @@
 # Web Journal
 
-A personal journaling app with a **macOS 26 Tahoe liquid glass** design, built with React, TypeScript, and Vite.
+A simple personal journaling app built with React, TypeScript, and Vite. Designed to feel smooth, minimal, and actually usable without trying too hard.
 
 ---
 
 ## Features
 
-- **Multiple Journals** — Create and organize entries into separate journals, each with a custom colour
-- **Mood Tracking** — Tag each entry with your mood (Happy, Excited, Neutral, Anxious, Sad)
-- **Tags** — Add searchable tags to any entry
-- **Dark & Light Mode** — Full macOS Tahoe vibrancy in both modes, toggled from the profile menu
-- **Collapsible Sidebar** — Expand or collapse the sidebar to focus on writing
-- **Local Storage** — All your entries are saved privately in your browser
+- **Multiple Journals**  
+  Organize entries into separate journals with custom colors
+
+- **Mood Tracking**  
+  Tag entries with moods like Happy, Neutral, Anxious, etc.
+
+- **Tags**  
+  Add and filter entries using custom tags
+
+- **Dark & Light Mode**  
+  Clean support for both themes, switchable from the profile menu
+
+- **Collapsible Sidebar**  
+  Hide distractions when you just want to write
+
+- **Local Storage**  
+  Everything stays in your browser. No accounts, no syncing
 
 ---
 
 ## Design
 
-Styled after **macOS 26 Tahoe** — Apple's liquid glass design language featuring:
+Inspired by macOS-style glass UI, but kept practical.
 
-- Ultra-translucent frosted-glass panels (`blur(60px) saturate(220%)`)
-- Specular inner highlight at the top edge of every surface
-- Gradient primary buttons with soft glow shadows
-- Thin `0.5px` dividers and borders
-- System-native SF Pro typography
-- Adaptive dark and light vibrancy materials
+- Subtle blur and transparency
+- Soft gradients and shadows
+- Clean spacing and readable typography
+- Focus on clarity over decoration
 
 ---
 
@@ -32,46 +41,44 @@ Styled after **macOS 26 Tahoe** — Apple's liquid glass design language featuri
 
 ### Requirements
 
-- [Node.js](https://nodejs.org) (LTS recommended)
+- Node.js (LTS recommended)
 
 ### Install & Run
 
 ```bash
-# Navigate to the project
-cd ~/Downloads/Web\ Journal\ -\ Edited\ by\ Claude
+cd ~/Downloads/Web\ Journal
 
-# Install dependencies (first time only)
 npm install
-
-# Start the dev server
 npm run dev
 ```
 
-Then open **http://localhost:5173** in your browser.
+Open in your browser:
 
-### Build for Production
+```
+http://localhost:5173
+```
+
+### Build
 
 ```bash
 npm run build
 ```
 
-The output will be in the `dist/` folder, ready to deploy anywhere (Netlify, Vercel, GitHub Pages, etc.).
+Production files will be in the `dist/` folder.
 
 ---
 
 ## Tech Stack
 
-| Tool | Purpose |
-|---|---|
-| [React 18](https://react.dev) | UI framework |
-| [TypeScript](https://typescriptlang.org) | Type safety |
-| [Vite](https://vitejs.dev) | Build tool & dev server |
-| [Tailwind CSS v4](https://tailwindcss.com) | Utility styling |
-| [Radix UI](https://radix-ui.com) | Accessible component primitives |
-| [shadcn/ui](https://ui.shadcn.com) | Pre-built component library |
-| [Lucide React](https://lucide.dev) | Icons |
-| [React Router](https://reactrouter.com) | Client-side routing |
-| [date-fns](https://date-fns.org) | Date formatting |
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Radix UI
+- shadcn/ui
+- Lucide Icons
+- React Router
+- date-fns
 
 ---
 
@@ -81,26 +88,36 @@ The output will be in the `dist/` folder, ready to deploy anywhere (Netlify, Ver
 src/
 ├── app/
 │   ├── components/
-│   │   ├── Layout.tsx       # App shell, sidebar + top bar
-│   │   ├── Sidebar.tsx      # Journal list, dark/light aware
-│   │   └── ProfileMenu.tsx  # Theme toggle + user menu
+│   │   ├── Layout.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── ProfileMenu.tsx
 │   ├── context/
-│   │   ├── BookContext.tsx   # Journal state
-│   │   └── ThemeContext.tsx  # Dark / light mode
+│   │   ├── BookContext.tsx
+│   │   └── ThemeContext.tsx
 │   ├── pages/
-│   │   ├── Home.tsx         # Entry list
-│   │   ├── NewEntry.tsx     # Create entry
-│   │   └── EntryDetail.tsx  # View / edit entry
+│   │   ├── Home.tsx
+│   │   ├── NewEntry.tsx
+│   │   └── EntryDetail.tsx
 │   └── utils/
-│       └── storage.ts       # localStorage helpers
+│       └── storage.ts
 └── styles/
-    ├── index.css            # Entry point
-    ├── theme.css            # Tahoe design tokens
-    └── tailwind.css         # Tailwind config
+    ├── index.css
+    ├── theme.css
+    └── tailwind.css
 ```
+
+---
+
+## Notes
+
+- No backend by design  
+- No user accounts  
+- Built for personal use and quick iteration  
 
 ---
 
 ## License
 
-Personal use. UI components from [shadcn/ui](https://ui.shadcn.com/) (MIT). Icons from [Lucide](https://lucide.dev/) (ISC).
+Personal use  
+UI components: shadcn/ui (MIT)  
+Icons: Lucide (ISC)
