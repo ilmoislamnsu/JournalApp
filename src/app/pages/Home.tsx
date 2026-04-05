@@ -247,9 +247,10 @@ export function Home() {
               {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
             </span>
           </div>
-          <Link to="/new">
+          <Link to="/new" className="flex-shrink-0">
+            {/* Full button — visible when there's enough room */}
             <button
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-all hover:brightness-110 active:scale-95"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-xl transition-all hover:brightness-110 active:scale-95 whitespace-nowrap"
               style={{
                 background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
                 boxShadow: '0 2px 8px rgba(0,122,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
@@ -257,6 +258,17 @@ export function Home() {
             >
               <Plus className="size-4" />
               New Entry
+            </button>
+            {/* Compact icon-only button — shown when space is tight */}
+            <button
+              className="sm:hidden flex items-center justify-center size-9 text-white rounded-full transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                boxShadow: '0 2px 8px rgba(0,122,255,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
+              }}
+              aria-label="New Entry"
+            >
+              <Plus className="size-5" />
             </button>
           </Link>
         </header>

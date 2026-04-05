@@ -200,21 +200,15 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   );
 
   return (
-    <aside
-      className="h-full flex flex-col"
-      style={{
-        // Tahoe sidebar vibrancy — adapts to dark / light
-        backdropFilter: 'blur(48px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(48px) saturate(200%)',
-        background: isDark
-          ? 'rgba(26,26,30,0.78)'
-          : 'rgba(246,246,248,0.82)',
-        // Specular highlight at top edge (Tahoe "liquid glass" trait)
-        boxShadow: `inset 0 1px 0 ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)'}`,
-      }}
-    >
+    <aside className="h-full flex flex-col">
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="px-4 py-5" style={{ borderBottom: `0.5px solid ${headerBorder}` }}>
+      <div
+        className={`px-4 ${isCollapsed ? 'py-3' : 'py-5'}`}
+        style={{
+          borderBottom: `0.5px solid ${headerBorder}`,
+          minHeight: isCollapsed ? '64px' : undefined,
+        }}
+      >
         {!isCollapsed ? (
           <>
             <div className="flex items-center gap-2 mb-4">
@@ -274,61 +268,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               </DialogContent>
             </Dialog>
           </>
-        ) : (
-          /* Collapsed header: icon-only "New" trigger */
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <button
-                className="w-full flex items-center justify-center p-2 rounded-xl transition-colors"
-                style={{
-                  color: isDark ? '#409cff' : '#007AFF',
-                  background: isDark ? 'rgba(10,132,255,0.12)' : 'rgba(0,122,255,0.08)',
-                }}
-                title="New Journal"
-              >
-                <Plus className="size-5" />
-              </button>
-            </DialogTrigger>
-            <DialogContent style={dialogSurface}>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-semibold" style={{ color: textPrimary }}>
-                  Create New Journal
-                </DialogTitle>
-                <DialogDescription style={{ color: textSecondary }}>
-                  Add a new journal to organize your entries.
-                </DialogDescription>
-              </DialogHeader>
-              <JournalForm
-                nameId="book-name-collapsed"
-                nameValue={newBookName}
-                onNameChange={setNewBookName}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddBook()}
-                colorValue={newBookColor}
-                onColorChange={setNewBookColor}
-              />
-              <DialogFooter>
-                <button
-                  onClick={() => setIsAddDialogOpen(false)}
-                  className="px-4 py-2 text-sm font-medium rounded-xl transition-colors"
-                  style={{
-                    color: textSecondary,
-                    background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddBook}
-                  disabled={!newBookName.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white rounded-xl transition-all disabled:opacity-40"
-                  style={primaryBtn}
-                >
-                  Create Journal
-                </button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+        ) : null}
       </div>
 
       {/* ── Books List ────────────────────────────────────────────── */}

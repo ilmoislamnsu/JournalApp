@@ -26,73 +26,83 @@ function LayoutContent() {
   const panelTransition = { duration: DURATION, ease: EASE };
 
   // ── Tahoe tokens ─────────────────────────────────────────────
-  const windowBg      = isDark ? '#111113'                    : '#ececee';
-  const sidebarBg     = isDark ? 'rgba(26,26,30,0.78)'       : 'rgba(246,246,248,0.82)';
-  const sidebarBorder = isDark ? 'rgba(255,255,255,0.08)'    : 'rgba(0,0,0,0.07)';
+  const windowBg      = isDark ? '#111113'                    : '#dddde0';
+  const sidebarBg     = isDark ? 'rgba(30,30,34,0.72)'       : 'rgba(255,255,255,0.55)';
+  const sidebarBorder = isDark ? 'rgba(255,255,255,0.11)'    : 'rgba(255,255,255,0.75)';
   const sidebarShadow = isDark
-    ? '0 0 0 0.5px rgba(255,255,255,0.06), 1px 0 0 rgba(0,0,0,0.35)'
-    : '0 0 0 0.5px rgba(0,0,0,0.07), 1px 0 0 rgba(0,0,0,0.04)';
-  const toggleBg      = isDark ? 'rgba(58,58,62,0.9)'        : 'rgba(255,255,255,0.88)';
-  const toggleBorder  = isDark ? 'rgba(255,255,255,0.12)'    : 'rgba(0,0,0,0.08)';
+    ? '0 20px 48px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07)'
+    : '0 20px 48px rgba(0,0,0,0.13), 0 4px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95)';
+  // Toggle button — always clearly visible against the sidebar
+  const toggleBg      = isDark ? '#2c2c2e'                   : '#ffffff';
+  const toggleBorder  = isDark ? 'rgba(255,255,255,0.22)'    : 'rgba(0,0,0,0.14)';
   const toggleShadow  = isDark
-    ? '0 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)'
-    : '0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)';
-  const toggleIcon    = isDark ? '#f2f2f7'                   : '#1c1c1e';
-  const topBarBg      = isDark ? 'rgba(17,17,19,0.85)'      : 'rgba(236,236,238,0.85)';
-  const topBarBorder  = isDark ? 'rgba(255,255,255,0.06)'   : 'rgba(0,0,0,0.05)';
+    ? '0 0 0 1px rgba(255,255,255,0.10), 0 4px 14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)'
+    : '0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,1)';
+  const toggleIcon    = isDark ? '#ffffff'                   : '#1c1c1e';
 
   return (
     <BookProvider>
       <div className="flex h-screen overflow-hidden" style={{ background: windowBg }}>
 
         {/* ── Sidebar ─────────────────────────────────────────── */}
+        {/* Outer shell — only handles width transition + floating gap */}
         <div
-          className={`relative z-10 flex-shrink-0 transition-all duration-300 ease-out ${
-            isSidebarCollapsed ? 'w-20' : 'w-64'
+          className={`relative z-10 flex-shrink-0 flex flex-col p-3 transition-all duration-300 ease-out ${
+            isSidebarCollapsed ? 'w-[88px]' : 'w-[272px]'
           }`}
-          style={{
-            backdropFilter:         'blur(48px) saturate(200%)',
-            WebkitBackdropFilter:   'blur(48px) saturate(200%)',
-            background:             sidebarBg,
-            borderRight:            `0.5px solid ${sidebarBorder}`,
-            boxShadow:              sidebarShadow,
-          }}
         >
-          <Sidebar isCollapsed={isSidebarCollapsed} />
-
-          <button
-            onClick={() => setIsSidebarCollapsed(v => !v)}
-            className="absolute -right-3.5 top-6 z-50 flex items-center justify-center size-7 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
-            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          {/* Floating glass panel */}
+          <div
+            className="relative flex-1 overflow-hidden"
             style={{
-              backdropFilter:       'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              background:           toggleBg,
-              border:               `0.5px solid ${toggleBorder}`,
-              boxShadow:            toggleShadow,
+              borderRadius:           '18px',
+              backdropFilter:         'blur(60px) saturate(220%)',
+              WebkitBackdropFilter:   'blur(60px) saturate(220%)',
+              background:             sidebarBg,
+              border:                 `0.5px solid ${sidebarBorder}`,
+              boxShadow:              sidebarShadow,
             }}
           >
-            {isSidebarCollapsed
-              ? <ChevronRight className="size-3.5" style={{ color: toggleIcon }} />
-              : <ChevronLeft  className="size-3.5" style={{ color: toggleIcon }} />
-            }
-          </button>
+            <Sidebar isCollapsed={isSidebarCollapsed} />
+
+            <button
+              onClick={() => setIsSidebarCollapsed(v => !v)}
+              className={`absolute z-50 flex items-center justify-center size-8 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${isSidebarCollapsed ? 'left-1/2 -translate-x-1/2 top-5' : 'right-3 top-5'}`}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              style={{
+                backdropFilter:       'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                background:           toggleBg,
+                border:               `0.5px solid ${toggleBorder}`,
+                boxShadow:            toggleShadow,
+              }}
+            >
+              {isSidebarCollapsed
+                ? <ChevronRight className="size-4" style={{ color: toggleIcon }} />
+                : <ChevronLeft  className="size-4" style={{ color: toggleIcon }} />
+              }
+            </button>
+          </div>
         </div>
 
         {/* ── Main ─────────────────────────────────────────────── */}
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
 
-          {/* Top bar */}
-          <div
-            className="z-20 flex-shrink-0 flex justify-end px-8 py-3"
-            style={{
-              backdropFilter:       'blur(24px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-              background:           topBarBg,
-              borderBottom:         `0.5px solid ${topBarBorder}`,
-            }}
-          >
-            <ProfileMenu />
+          {/* Top bar — floating glass pill */}
+          <div className="flex-shrink-0 px-3 pt-3 z-20">
+            <div
+              className="flex justify-end px-5 py-2.5"
+              style={{
+                borderRadius:         '14px',
+                backdropFilter:       'blur(60px) saturate(220%)',
+                WebkitBackdropFilter: 'blur(60px) saturate(220%)',
+                background:           sidebarBg,
+                border:               `0.5px solid ${sidebarBorder}`,
+                boxShadow:            sidebarShadow,
+              }}
+            >
+              <ProfileMenu />
+            </div>
           </div>
 
           {/*
