@@ -4,7 +4,7 @@ import { ArrowLeft, Smile, Frown, Meh, Sparkles, CloudRain } from 'lucide-react'
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
-import { saveEntry } from '../utils/storage';
+import { useStorage } from '../hooks/useStorage';
 import { JournalEntry } from '../types';
 import { useBook } from '../context/BookContext';
 import { useTheme } from '../context/ThemeContext';
@@ -18,9 +18,10 @@ const moods = [
 ];
 
 export function NewEntry() {
-  const navigate       = useNavigate();
+  const navigate         = useNavigate();
   const { selectedBook } = useBook();
-  const { theme }      = useTheme();
+  const { theme }        = useTheme();
+  const storage          = useStorage();
   const isDark         = theme === 'dark';
 
   const [title, setTitle]     = useState('');
@@ -71,7 +72,7 @@ export function NewEntry() {
       mood: mood as JournalEntry['mood'],
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
     };
-    saveEntry(entry);
+    storage.saveEntry(entry);
     navigate('/');
   };
 

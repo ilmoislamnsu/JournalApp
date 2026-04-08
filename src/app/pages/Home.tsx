@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Plus, Calendar, Smile, Frown, Meh, Sparkles, CloudRain } from 'lucide-react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
-import { getEntriesByBook } from '../utils/storage';
+import { useStorage } from '../hooks/useStorage';
 import { JournalEntry } from '../types';
 import { format } from 'date-fns';
 import { useBook } from '../context/BookContext';
@@ -36,6 +36,7 @@ function EntryCard({
 }) {
   const navigate  = useNavigate();
   const cardRef   = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Spring-physics glow tracking — watery feel
   const rawX  = useMotionValue(0);
@@ -73,6 +74,14 @@ function EntryCard({
     >
       <motion.div
         ref={cardRef}
+        draggable
+        onDragStart={(e) => {
+          // Store entry id so Sidebar can pick it up
+          (e as unknown as React.DragEvent).dataTransfer.setData('entryId', entry.id);
+          (e as unknown as React.DragEvent).dataTransfer.effectAllowed = 'move';
+          setIsDragging(true);
+        }}
+        onDragEnd={() => setIsDragging(false)}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onClick={() => navigate(`/entry/${entry.id}`)}
@@ -89,7 +98,8 @@ function EntryCard({
           overflow:             'hidden',
           borderRadius:         '18px',
           padding:              '20px 22px',
-          cursor:               'pointer',
+          cursor:               isDragging ? 'grabbing' : 'grab',
+          opacity:              isDragging ? 0.5 : 1,
           backdropFilter:       'blur(40px) saturate(200%)',
           WebkitBackdropFilter: 'blur(40px) saturate(200%)',
           background: isDark ? 'rgba(30,30,34,0.70)' : 'rgba(255,255,255,0.72)',
@@ -184,6 +194,7 @@ function EntryCard({
 export function Home() {
   const { selectedBook }       = useBook();
   const { theme }              = useTheme();
+  const storage                = useStorage();
   const isDark                 = theme === 'dark';
   const [entries, setEntries]  = useState<JournalEntry[]>([]);
 
@@ -202,8 +213,8 @@ export function Home() {
   };
 
   useEffect(() => {
-    if (selectedBook) setEntries(getEntriesByBook(selectedBook.id));
-  }, [selectedBook]);
+    if (selectedBook) setEntries(storage.getEntriesByBook(selectedBook.id));
+  }, [selectedBook, storage.scope]);
 
   if (!selectedBook) {
     return (

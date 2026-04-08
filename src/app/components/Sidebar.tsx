@@ -26,7 +26,7 @@ import {
 import { useBook } from '../context/BookContext';
 import { useTheme } from '../context/ThemeContext';
 import { Book } from '../types';
-import { saveBook, deleteBook, getEntriesByBook } from '../utils/storage';
+import { useStorage } from '../hooks/useStorage';
 
 const colorOptions = [
   '#007AFF', // blue
@@ -46,6 +46,7 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed }: SidebarProps) {
   const { selectedBook, setSelectedBook, books, refreshBooks } = useBook();
   const { theme } = useTheme();
+  const storage = useStorage();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
@@ -53,6 +54,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   const [newBookColor, setNewBookColor] = useState(colorOptions[0]);
   const [editBookName, setEditBookName] = useState('');
   const [editBookColor, setEditBookColor] = useState(colorOptions[0]);
+  const [dragOverBookId, setDragOverBookId] = useState<string | null>(null);
 
   const isDark = theme === 'dark';
 
@@ -89,7 +91,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       name: newBookName.trim(),
       color: newBookColor,
     };
-    saveBook(newBook);
+    storage.saveBook(newBook);
     refreshBooks();
     setNewBookName('');
     setNewBookColor(colorOptions[0]);
@@ -104,7 +106,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       name: editBookName.trim(),
       color: editBookColor,
     };
-    saveBook(updatedBook);
+    storage.saveBook(updatedBook);
     refreshBooks();
     if (selectedBook?.id === editingBook.id) setSelectedBook(updatedBook);
     setIsEditDialogOpen(false);
@@ -112,7 +114,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
   };
 
   const handleDeleteBook = (book: Book) => {
-    deleteBook(book.id);
+    storage.deleteBook(book.id);
     refreshBooks();
     if (selectedBook?.id === book.id) {
       const remaining = books.filter((b) => b.id !== book.id);
@@ -275,23 +277,48 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       <div className="flex-1 overflow-y-auto py-2">
         <div className="space-y-0.5 px-2">
           {books.map((book) => {
-            const entryCount = getEntriesByBook(book.id).length;
+            const entryCount = storage.getEntriesByBook(book.id).length;
             const isSelected = selectedBook?.id === book.id;
 
             return (
               <div
                 key={book.id}
                 className="group relative flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition-all duration-150"
-                style={{ background: isSelected ? itemSelectedBg : 'transparent' }}
+                style={{
+                  background: dragOverBookId === book.id
+                    ? (isDark ? 'rgba(10,132,255,0.28)' : 'rgba(0,122,255,0.16)')
+                    : isSelected ? itemSelectedBg : 'transparent',
+                  outline: dragOverBookId === book.id
+                    ? `1.5px solid ${isDark ? 'rgba(10,132,255,0.7)' : 'rgba(0,122,255,0.5)'}` : 'none',
+                  transform: dragOverBookId === book.id ? 'scale(1.025)' : 'scale(1)',
+                }}
                 onMouseEnter={(e) => {
-                  if (!isSelected)
+                  if (!isSelected && dragOverBookId !== book.id)
                     (e.currentTarget as HTMLDivElement).style.background = itemHoverBg;
                 }}
                 onMouseLeave={(e) => {
-                  if (!isSelected)
+                  if (!isSelected && dragOverBookId !== book.id)
                     (e.currentTarget as HTMLDivElement).style.background = 'transparent';
                 }}
                 onClick={() => setSelectedBook(book)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  setDragOverBookId(book.id);
+                }}
+                onDragLeave={() => setDragOverBookId(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverBookId(null);
+                  const entryId = e.dataTransfer.getData('entryId');
+                  if (!entryId) return;
+                  const entry = storage.getEntryById(entryId);
+                  if (entry && entry.bookId !== book.id) {
+                    storage.saveEntry({ ...entry, bookId: book.id });
+                    refreshBooks();
+                    setSelectedBook(book);
+                  }
+                }}
               >
                 {!isCollapsed ? (
                   <>

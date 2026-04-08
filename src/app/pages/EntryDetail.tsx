@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog';
-import { getEntryById, saveEntry, deleteEntry } from '../utils/storage';
+import { useStorage } from '../hooks/useStorage';
 import { JournalEntry } from '../types';
 import { format } from 'date-fns';
 import { useBook } from '../context/BookContext';
@@ -38,6 +38,7 @@ export function EntryDetail() {
   const navigate      = useNavigate();
   const { refreshBooks } = useBook();
   const { theme }     = useTheme();
+  const storage       = useStorage();
   const isDark        = theme === 'dark';
 
   const [entry, setEntry]             = useState<JournalEntry | null>(null);
@@ -98,7 +99,7 @@ export function EntryDetail() {
 
   useEffect(() => {
     if (id) {
-      const foundEntry = getEntryById(id);
+      const foundEntry = storage.getEntryById(id);
       if (foundEntry) {
         setEntry(foundEntry);
         setEditTitle(foundEntry.title);
@@ -120,13 +121,13 @@ export function EntryDetail() {
       mood: editMood as JournalEntry['mood'],
       tags: editTags.split(',').map((t) => t.trim()).filter(Boolean),
     };
-    saveEntry(updated);
+    storage.saveEntry(updated);
     setEntry(updated);
     setIsEditing(false);
   };
 
   const handleDelete = () => {
-    if (entry) { deleteEntry(entry.id); refreshBooks(); navigate('/'); }
+    if (entry) { storage.deleteEntry(entry.id); refreshBooks(); navigate('/'); }
   };
 
   const getMoodIcon = (mood?: string) => {

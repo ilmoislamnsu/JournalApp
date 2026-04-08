@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -6,7 +6,11 @@ import { Sidebar } from './Sidebar';
 import { ProfileMenu } from './ProfileMenu';
 import { Home } from '../pages/Home';
 import { BookProvider } from '../context/BookContext';
-import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
+
+const SIDEBAR_MIN = 200;
+const SIDEBAR_MAX = 480;
+const SIDEBAR_DEFAULT = 272;
 
 // Smooth iOS-style easing
 const EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
@@ -14,9 +18,48 @@ const DURATION = 0.34;
 
 function LayoutContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('sidebar_width');
+    return saved ? Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, parseInt(saved))) : SIDEBAR_DEFAULT;
+  });
+  const isResizing   = useRef(false);
+  const resizeStartX = useRef(0);
+  const resizeStartW = useRef(0);
   const { theme } = useTheme();
   const location  = useLocation();
   const isDark    = theme === 'dark';
+
+  // ── Resize mouse handlers ──────────────────────────────────────
+  const onResizeStart = useCallback((e: React.MouseEvent) => {
+    if (isSidebarCollapsed) return;
+    isResizing.current  = true;
+    resizeStartX.current = e.clientX;
+    resizeStartW.current = sidebarWidth;
+    e.preventDefault();
+  }, [isSidebarCollapsed, sidebarWidth]);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const next = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, resizeStartW.current + e.clientX - resizeStartX.current));
+      setSidebarWidth(next);
+      localStorage.setItem('sidebar_width', String(next));
+      // Keep cursor col-resize during drag
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    };
+    const onUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+  }, []);
 
   // Any child route means the detail panel should be visible
   const isDetail = location.pathname !== '/';
@@ -45,11 +88,14 @@ function LayoutContent() {
       <div className="flex h-screen overflow-hidden" style={{ background: windowBg }}>
 
         {/* ── Sidebar ─────────────────────────────────────────── */}
-        {/* Outer shell — only handles width transition + floating gap */}
+        {/* Outer shell — handles width + floating gap */}
         <div
-          className={`relative z-10 flex-shrink-0 flex flex-col p-3 transition-all duration-300 ease-out ${
-            isSidebarCollapsed ? 'w-[88px]' : 'w-[272px]'
-          }`}
+          className="relative z-10 flex-shrink-0 flex flex-col p-3"
+          style={{
+            width: isSidebarCollapsed ? 88 : sidebarWidth,
+            // Only animate when toggling collapsed — not while dragging
+            transition: isResizing.current ? 'none' : 'width 0.3s ease-out',
+          }}
         >
           {/* Floating glass panel */}
           <div
@@ -83,6 +129,43 @@ function LayoutContent() {
               }
             </button>
           </div>
+
+          {/* Resize handle — sits in the right padding gap */}
+          {!isSidebarCollapsed && (
+            <div
+              onMouseDown={onResizeStart}
+              style={{
+                position:   'absolute',
+                top:        12,
+                bottom:     12,
+                right:      0,
+                width:      8,
+                cursor:     'col-resize',
+                zIndex:     30,
+                display:    'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {/* Subtle visible grip line */}
+              <div style={{
+                width:        2,
+                height:       '100%',
+                borderRadius: 2,
+                background:   isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)',
+                transition:   'background 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background =
+                  isDark ? 'rgba(10,132,255,0.55)' : 'rgba(0,122,255,0.40)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.background =
+                  isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+              }}
+              />
+            </div>
+          )}
         </div>
 
         {/* ── Main ─────────────────────────────────────────────── */}
@@ -156,9 +239,5 @@ function LayoutContent() {
 }
 
 export function Layout() {
-  return (
-    <ThemeProvider>
-      <LayoutContent />
-    </ThemeProvider>
-  );
+  return <LayoutContent />;
 }
